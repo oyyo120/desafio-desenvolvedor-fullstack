@@ -1,16 +1,32 @@
-import React, { useRef } from 'react';
-import { Jumbotron, Button, Card, Col, Container, Form, Accordion } from 'react-bootstrap';
+import React, { useRef , useState} from 'react';
+import { Jumbotron, Button, Card, Col, Container, Form, Accordion, Table } from 'react-bootstrap';
 import axios from 'axios';
 
 function App() {
   const name = useRef(null);
   const email = useRef(null);
   const telefone = useRef(null);
-  const valor = useRef(null);
-  const tempo = useRef(null);
+  const valor = useRef(0);
+  const tempo = useRef(0);
+
+  const [value, setValue] = useState('');
+  const handleChangeValue = (e) => setValue(e.target.value);
+
+  const [time, setTime] = useState('');
+  const handleChangeTime = (e) => setTime(e.target.time);
+
+  const taxaPoup = (1.4/100) * value;
+  const taxaCDI = (1.8/100) * value;
+  const taxaCDB = (1.98/100) * value;
   
-  function handleClick(e) {
+  //Fazer calculo de juros composto
+  const CDI = taxaCDI;
+  const POUP = taxaPoup;
+  const CDB = taxaCDB;
+
+  function handleClick(e, valor, tempo) {
     e.preventDefault();
+
     axios({
       method: 'post',
       url: 'http://localhost:8080',
@@ -62,14 +78,18 @@ function App() {
             <Col sm={3}>
               <Form.Group controlId="formBasicValor">
               <Form.Label>Quanto você quer investir hoje?</Form.Label>
-                <Form.Control type="number" ref={valor} placeholder="Valor" />
+                <Form.Control type="number"
+                 value={value} onChange={handleChangeValue} 
+                 ref={valor} placeholder="Valor sem casa decimal" />
               </Form.Group>
             </Col>
             <Col sm={1}></Col>
             <Col sm={3}> 
               <Form.Group controlId="formBasicAnos">
               <Form.Label>Por quanto tempo você pretende deixar o seu dinheiro investido?</Form.Label>
-                <Form.Control ref={tempo} placeholder="Anos" />
+                <Form.Control ref={tempo} type="number"
+                value={time} onChange={handleChangeTime} 
+                placeholder="Em anos" />
               </Form.Group>
               <Button 
                 variant="primary" 
@@ -77,7 +97,30 @@ function App() {
                 onClick={handleClick}>
                 Calcular!
               </Button>
+
             </Col>
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>CDI</th>
+                  <th>Poupança</th>
+                  <th>CDBpos</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Valor:</td>
+                  <td>${CDI}</td>  
+                  <td>${POUP}</td>  
+                  <td>${CDB}</td>
+                  {/* <td>${((valor.current.value/100*1.8) * tempo.current.value) + valor.current.value}</td>
+                  <td>${((valor.current.value/100*1.4) * tempo.current.value) + valor.current.value}</td>
+                  <td>${((valor.current.value/100*1.98) * tempo.current.value) + valor.current.value}</td> */}
+                </tr>
+              </tbody>
+            </Table>
+
           </Form.Row>
         </Form>
 
